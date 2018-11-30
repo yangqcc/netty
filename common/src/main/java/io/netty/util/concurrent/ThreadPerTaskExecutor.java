@@ -18,6 +18,12 @@ package io.netty.util.concurrent;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadFactory;
 
+/**
+ * 继承Executor,用于提交任务,作为默认executor
+ * {@link MultithreadEventExecutorGroup#MultithreadEventExecutorGroup(int, Executor, EventExecutorChooserFactory, Object...)}
+ *
+ * @author yangqc
+ */
 public final class ThreadPerTaskExecutor implements Executor {
     private final ThreadFactory threadFactory;
 

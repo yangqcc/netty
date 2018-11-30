@@ -15,11 +15,7 @@
  */
 package io.netty.channel.nio;
 
-import io.netty.channel.Channel;
-import io.netty.channel.EventLoop;
-import io.netty.channel.DefaultSelectStrategyFactory;
-import io.netty.channel.MultithreadEventLoopGroup;
-import io.netty.channel.SelectStrategyFactory;
+import io.netty.channel.*;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.EventExecutorChooserFactory;
 import io.netty.util.concurrent.RejectedExecutionHandler;
@@ -73,7 +69,7 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
     }
 
     public NioEventLoopGroup(int nThreads, ThreadFactory threadFactory,
-        final SelectorProvider selectorProvider, final SelectStrategyFactory selectStrategyFactory) {
+                             final SelectorProvider selectorProvider, final SelectStrategyFactory selectStrategyFactory) {
         super(nThreads, threadFactory, selectorProvider, selectStrategyFactory, RejectedExecutionHandlers.reject());
     }
 
@@ -106,7 +102,7 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
      * {@code 50}, which means the event loop will try to spend the same amount of time for I/O as for non-I/O tasks.
      */
     public void setIoRatio(int ioRatio) {
-        for (EventExecutor e: this) {
+        for (EventExecutor e : this) {
             ((NioEventLoop) e).setIoRatio(ioRatio);
         }
     }
@@ -116,14 +112,15 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
      * around the  infamous epoll 100% CPU bug.
      */
     public void rebuildSelectors() {
-        for (EventExecutor e: this) {
+        for (EventExecutor e : this) {
             ((NioEventLoop) e).rebuildSelector();
         }
     }
 
     @Override
     protected EventLoop newChild(Executor executor, Object... args) throws Exception {
+        //新建子EventLoop,当前类作为NioEventLoop的父类
         return new NioEventLoop(this, executor, (SelectorProvider) args[0],
-            ((SelectStrategyFactory) args[1]).newSelectStrategy(), (RejectedExecutionHandler) args[2]);
+                ((SelectStrategyFactory) args[1]).newSelectStrategy(), (RejectedExecutionHandler) args[2]);
     }
 }
