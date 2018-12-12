@@ -27,11 +27,7 @@ import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
 import java.io.IOException;
-import java.net.ConnectException;
-import java.net.InetSocketAddress;
-import java.net.NoRouteToHostException;
-import java.net.SocketAddress;
-import java.net.SocketException;
+import java.net.*;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.NotYetConnectedException;
 import java.util.concurrent.Executor;
@@ -68,15 +64,16 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     private volatile boolean registered;
     private boolean closeInitiated;
 
-    /** Cache for the string representation of this channel */
+    /**
+     * Cache for the string representation of this channel
+     */
     private boolean strValActive;
     private String strVal;
 
     /**
      * Creates a new instance.
      *
-     * @param parent
-     *        the parent of this channel. {@code null} if there's no parent.
+     * @param parent the parent of this channel. {@code null} if there's no parent.
      */
     protected AbstractChannel(Channel parent) {
         this.parent = parent;
@@ -88,8 +85,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     /**
      * Creates a new instance.
      *
-     * @param parent
-     *        the parent of this channel. {@code null} if there's no parent.
+     * @param parent the parent of this channel. {@code null} if there's no parent.
      */
     protected AbstractChannel(Channel parent, ChannelId id) {
         this.parent = parent;
@@ -383,28 +379,28 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         SocketAddress localAddr = localAddress();
         if (remoteAddr != null) {
             StringBuilder buf = new StringBuilder(96)
-                .append("[id: 0x")
-                .append(id.asShortText())
-                .append(", L:")
-                .append(localAddr)
-                .append(active? " - " : " ! ")
-                .append("R:")
-                .append(remoteAddr)
-                .append(']');
+                    .append("[id: 0x")
+                    .append(id.asShortText())
+                    .append(", L:")
+                    .append(localAddr)
+                    .append(active ? " - " : " ! ")
+                    .append("R:")
+                    .append(remoteAddr)
+                    .append(']');
             strVal = buf.toString();
         } else if (localAddr != null) {
             StringBuilder buf = new StringBuilder(64)
-                .append("[id: 0x")
-                .append(id.asShortText())
-                .append(", L:")
-                .append(localAddr)
-                .append(']');
+                    .append("[id: 0x")
+                    .append(id.asShortText())
+                    .append(", L:")
+                    .append(localAddr)
+                    .append(']');
             strVal = buf.toString();
         } else {
             StringBuilder buf = new StringBuilder(16)
-                .append("[id: 0x")
-                .append(id.asShortText())
-                .append(']');
+                    .append("[id: 0x")
+                    .append(id.asShortText())
+                    .append(']');
             strVal = buf.toString();
         }
 
@@ -425,7 +421,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         private volatile ChannelOutboundBuffer outboundBuffer = new ChannelOutboundBuffer(AbstractChannel.this);
         private RecvByteBufAllocator.Handle recvHandle;
         private boolean inFlush0;
-        /** true if the channel has never been registered, false otherwise */
+        /**
+         * true if the channel has never been registered, false otherwise
+         */
         private boolean neverRegistered = true;
 
         private void assertEventLoop() {
@@ -455,6 +453,12 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             return remoteAddress0();
         }
 
+        /**
+         * 注册ChannelPromise中的channel,一旦注册成功,通知ChannelFuture
+         *
+         * @param eventLoop
+         * @param promise
+         */
         @Override
         public final void register(EventLoop eventLoop, final ChannelPromise promise) {
             if (eventLoop == null) {
@@ -472,6 +476,10 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             AbstractChannel.this.eventLoop = eventLoop;
 
+            /**
+             * 判断当前线程是否是eventLoop的线程,如果是,那么直接注册,如果不是,放入eventLoop中的线程池进行注册,
+             * 放入线程池中,也可能是马上执行,也可能是放入阻塞队列
+             */
             if (eventLoop.inEventLoop()) {
                 register0(promise);
             } else {
@@ -500,8 +508,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 if (!promise.setUncancellable() || !ensureOpen(promise)) {
                     return;
                 }
+                //设置状态,当前还没有注册
                 boolean firstRegistration = neverRegistered;
+                //将java原生channel注册到原生的selector,但是没有注册感兴趣的事件
                 doRegister();
+                //修改状态
                 neverRegistered = false;
                 registered = true;
 
@@ -509,12 +520,15 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 // user may already fire events through the pipeline in the ChannelFutureListener.
                 pipeline.invokeHandlerAddedIfNeeded();
 
+                //设置promise为成功状态,并且会通知listener
                 safeSetSuccess(promise);
                 pipeline.fireChannelRegistered();
+                // channel在之前没有注册才会触发channelActive事件,防止一个通道取消注册然后再次注册而多次重复触发channelActive事件
                 // Only fire a channelActive if the channel has never been registered. This prevents firing
                 // multiple channel actives if the channel is deregistered and re-registered.
                 if (isActive()) {
                     if (firstRegistration) {
+                        //触发channelActive事件
                         pipeline.fireChannelActive();
                     } else if (config().isAutoRead()) {
                         // This channel was registered before and autoRead() is set. This means we need to begin read
@@ -542,15 +556,15 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
             // See: https://github.com/netty/netty/issues/576
             if (Boolean.TRUE.equals(config().getOption(ChannelOption.SO_BROADCAST)) &&
-                localAddress instanceof InetSocketAddress &&
-                !((InetSocketAddress) localAddress).getAddress().isAnyLocalAddress() &&
-                !PlatformDependent.isWindows() && !PlatformDependent.maybeSuperUser()) {
+                    localAddress instanceof InetSocketAddress &&
+                    !((InetSocketAddress) localAddress).getAddress().isAnyLocalAddress() &&
+                    !PlatformDependent.isWindows() && !PlatformDependent.maybeSuperUser()) {
                 // Warn a user about the fact that a non-root user can't receive a
                 // broadcast packet on *nix if the socket is bound on non-wildcard address.
                 logger.warn(
                         "A non-root user can't receive a broadcast packet if the socket " +
-                        "is not bound to a wildcard address; binding to a non-wildcard " +
-                        "address (" + localAddress + ") anyway as requested.");
+                                "is not bound to a wildcard address; binding to a non-wildcard " +
+                                "address (" + localAddress + ") anyway as requested.");
             }
 
             boolean wasActive = isActive();
@@ -624,6 +638,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         /**
          * Shutdown the output portion of the corresponding {@link Channel}.
          * For example this will clean up the {@link ChannelOutboundBuffer} and not allow any more writes.
+         *
          * @param cause The cause which may provide rational for the shutdown.
          */
         private void shutdownOutput(final ChannelPromise promise, Throwable cause) {
@@ -972,9 +987,11 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
         }
 
         /**
+         * 设置promise为success
          * Marks the specified {@code promise} as success.  If the {@code promise} is done already, log a message.
          */
         protected final void safeSetSuccess(ChannelPromise promise) {
+            //promise.trySuccess()方法会设置promise成功状态,并且会通知listener
             if (!(promise instanceof VoidChannelPromise) && !promise.trySuccess()) {
                 logger.warn("Failed to mark a promise as success because it is done already: {}", promise);
             }
@@ -1059,8 +1076,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     protected abstract SocketAddress remoteAddress0();
 
     /**
+     * Channel注册到EventLoop里面
      * Is called after the {@link Channel} is registered with its {@link EventLoop} as part of the register process.
-     *
+     * <p>
      * Sub-classes may override this method
      */
     protected void doRegister() throws Exception {
@@ -1093,7 +1111,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     /**
      * Deregister the {@link Channel} from its {@link EventLoop}.
-     *
+     * <p>
      * Sub-classes may override this method
      */
     protected void doDeregister() throws Exception {

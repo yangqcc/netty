@@ -16,16 +16,7 @@
 package io.netty.channel.socket.nio;
 
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelException;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelOutboundBuffer;
-import io.netty.channel.ChannelPromise;
-import io.netty.channel.EventLoop;
-import io.netty.channel.FileRegion;
-import io.netty.channel.RecvByteBufAllocator;
+import io.netty.channel.*;
 import io.netty.channel.nio.AbstractNioByteChannel;
 import io.netty.channel.socket.DefaultSocketChannelConfig;
 import io.netty.channel.socket.ServerSocketChannel;
@@ -97,8 +88,8 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
     /**
      * Create a new instance
      *
-     * @param parent    the {@link Channel} which created this instance or {@code null} if it was created by the user
-     * @param socket    the {@link SocketChannel} which will be used
+     * @param parent the {@link Channel} which created this instance or {@code null} if it was created by the user
+     * @param socket the {@link SocketChannel} which will be used
      */
     public NioSocketChannel(Channel parent, SocketChannel socket) {
         super(parent, socket);
@@ -261,6 +252,7 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
             promise.setSuccess();
         }
     }
+
     private void shutdownInput0(final ChannelPromise promise) {
         try {
             shutdownInput0();
@@ -301,6 +293,14 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
         }
     }
 
+    /**
+     * 实际进行连接操作的地方
+     *
+     * @param remoteAddress
+     * @param localAddress
+     * @return
+     * @throws Exception
+     */
     @Override
     protected boolean doConnect(SocketAddress remoteAddress, SocketAddress localAddress) throws Exception {
         if (localAddress != null) {
@@ -463,6 +463,7 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
 
     private final class NioSocketChannelConfig extends DefaultSocketChannelConfig {
         private volatile int maxBytesPerGatheringWrite = Integer.MAX_VALUE;
+
         private NioSocketChannelConfig(NioSocketChannel channel, Socket javaSocket) {
             super(channel, javaSocket);
             calculateMaxBytesPerGatheringWrite();
