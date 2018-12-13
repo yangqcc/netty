@@ -150,22 +150,27 @@ public class Bootstrap extends AbstractBootstrap<Bootstrap, Channel> {
     }
 
     /**
-     * 连接到远程地址实际操作
+     * 实际连接到远程地址
      *
      * @see #connect()
      */
     private ChannelFuture doResolveAndConnect(final SocketAddress remoteAddress, final SocketAddress localAddress) {
+        //初始化并且注册future
         final ChannelFuture regFuture = initAndRegister();
         final Channel channel = regFuture.channel();
 
+        //如果已经注册完成
         if (regFuture.isDone()) {
             if (!regFuture.isSuccess()) {
                 return regFuture;
             }
+            //执行连接操作
             return doResolveAndConnect0(channel, remoteAddress, localAddress, channel.newPromise());
         } else {
+            //注册future基本上已经完成,但是以防万一
             // Registration future is almost always fulfilled already, but just in case it's not.
             final PendingRegistrationPromise promise = new PendingRegistrationPromise(channel);
+            //添加一个listener,用于注册完成执行连接操作
             regFuture.addListener(new ChannelFutureListener() {
                 @Override
                 public void operationComplete(ChannelFuture future) throws Exception {
@@ -188,6 +193,15 @@ public class Bootstrap extends AbstractBootstrap<Bootstrap, Channel> {
         }
     }
 
+    /**
+     * 开始进行连接操作
+     *
+     * @param channel
+     * @param remoteAddress
+     * @param localAddress
+     * @param promise
+     * @return
+     */
     private ChannelFuture doResolveAndConnect0(final Channel channel, SocketAddress remoteAddress,
                                                final SocketAddress localAddress, final ChannelPromise promise) {
         try {

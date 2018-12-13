@@ -148,6 +148,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
     public Promise<V> addListener(GenericFutureListener<? extends Future<? super V>> listener) {
         checkNotNull(listener, "listener");
 
+        //同步添加listener
         synchronized (this) {
             addListener0(listener);
         }
@@ -481,6 +482,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
             } else {
                 notifyListener0(this, (GenericFutureListener<?>) listeners);
             }
+            //如果listener为空,那么则返回,否则继续执行
             synchronized (this) {
                 if (this.listeners == null) {
                     // Nothing can throw from within this method, so setting notifyingListeners back to false does not
