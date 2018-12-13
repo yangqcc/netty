@@ -332,7 +332,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         }
 
         /**
-         * config的EventLoopGroup注册channel
+         * config的EventLoopGroup注册channel,这里的group就是父EventLoopGroup
          */
         ChannelFuture regFuture = config().group().register(channel);
         if (regFuture.cause() != null) {

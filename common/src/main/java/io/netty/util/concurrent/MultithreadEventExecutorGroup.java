@@ -59,6 +59,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
     }
 
     /**
+     * 构造方法里面会初始化几个子group
      * Create a new instance.
      *
      * @param nThreads       the number of threads that will be used by this instance.
@@ -72,7 +73,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
             throw new IllegalArgumentException(String.format("nThreads: %d (expected: > 0)", nThreads));
         }
 
-        //如果executor为空,这里新建一个executor
+        //如果executor为空,这里新建一个executor,这个executor放到子reactor里面,用于执行任务
         if (executor == null) {
             executor = new ThreadPerTaskExecutor(newDefaultThreadFactory());
         }
@@ -84,6 +85,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
         for (int i = 0; i < nThreads; i++) {
             boolean success = false;
             try {
+                //创建子reactor
                 children[i] = newChild(executor, args);
                 success = true;
             } catch (Exception e) {

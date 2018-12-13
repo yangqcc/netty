@@ -1402,9 +1402,16 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             ctx.fireExceptionCaught(cause);
         }
 
+        /**
+         * 该方法会在注册完成后马上调用
+         *
+         * @param ctx
+         * @throws Exception
+         */
         @Override
         public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
             invokeHandlerAddedIfNeeded();
+            //传递
             ctx.fireChannelRegistered();
         }
 
