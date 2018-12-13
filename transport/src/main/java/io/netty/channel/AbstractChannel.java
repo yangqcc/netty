@@ -78,7 +78,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     protected AbstractChannel(Channel parent) {
         this.parent = parent;
         id = newId();
+        //创建了内部类Unsafe
         unsafe = newUnsafe();
+        //通道创建了PopeLine
         pipeline = newChannelPipeline();
     }
 
@@ -100,6 +102,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     }
 
     /**
+     * Channel的Id
      * Returns a new {@link DefaultChannelId} instance. Subclasses may override this method to assign custom
      * {@link ChannelId}s to {@link Channel}s that use the {@link AbstractChannel#AbstractChannel(Channel)} constructor.
      */
@@ -251,6 +254,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
 
     @Override
     public ChannelFuture bind(SocketAddress localAddress, ChannelPromise promise) {
+        //pipeline调用bind方法
         return pipeline.bind(localAddress, promise);
     }
 
@@ -478,6 +482,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 return;
             }
 
+            //这里eventLoop绑定到channel上面
             AbstractChannel.this.eventLoop = eventLoop;
 
             /**
@@ -581,6 +586,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             }
 
             if (!wasActive && isActive()) {
+                //这里调用fireChannelActive方法
                 invokeLater(new Runnable() {
                     @Override
                     public void run() {

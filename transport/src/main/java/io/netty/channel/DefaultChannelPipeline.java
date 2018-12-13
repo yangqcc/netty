@@ -1420,8 +1420,9 @@ public class DefaultChannelPipeline implements ChannelPipeline {
 
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
+            //继续执行下面的handler
             ctx.fireChannelActive();
-
+            //执行完handler执行下面函数
             readIfIsAutoRead();
         }
 
@@ -1443,6 +1444,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         }
 
         private void readIfIsAutoRead() {
+            //isAutoRead默认返回true
             if (channel.config().isAutoRead()) {
                 channel.read();
             }

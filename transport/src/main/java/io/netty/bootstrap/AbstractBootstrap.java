@@ -241,6 +241,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
      * Create a new {@link Channel} and bind it.
      */
     public ChannelFuture bind(int inetPort) {
+        //通过端口号创建InetSocketAddress,然后继续bind
         return bind(new InetSocketAddress(inetPort));
     }
 
@@ -262,6 +263,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
      * Create a new {@link Channel} and bind it.
      */
     public ChannelFuture bind(SocketAddress localAddress) {
+        //验证服务启动参数,然后继续bind
         validate();
         if (localAddress == null) {
             throw new NullPointerException("localAddress");
@@ -270,6 +272,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     }
 
     private ChannelFuture doBind(final SocketAddress localAddress) {
+        //初始化channel以及注册
         final ChannelFuture regFuture = initAndRegister();
         final Channel channel = regFuture.channel();
         if (regFuture.cause() != null) {
@@ -277,8 +280,10 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
         }
 
         if (regFuture.isDone()) {
+            //此时,通道已经注册完成
             // At this point we know that the registration was complete and successful.
             ChannelPromise promise = channel.newPromise();
+            //开始绑定
             doBind0(regFuture, channel, localAddress, promise);
             return promise;
         } else {
@@ -362,6 +367,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             final ChannelFuture regFuture, final Channel channel,
             final SocketAddress localAddress, final ChannelPromise promise) {
 
+        // 在通道注册前调用,给用户的handler通过channelRegistered()操作进行设置pipeline的机会
         // This method is invoked before channelRegistered() is triggered.  Give user handlers a chance to set up
         // the pipeline in its channelRegistered() implementation.
         channel.eventLoop().execute(new Runnable() {
