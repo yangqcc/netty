@@ -59,6 +59,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
     }
 
     /**
+     * EventLoopGroup在创建过程中就会创建子Group
      * Create a new instance.
      *
      * @param nThreads       the number of threads that will be used by this instance.

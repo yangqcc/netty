@@ -401,6 +401,11 @@ public abstract class AbstractNioChannel extends AbstractChannel {
         eventLoop().cancel(selectionKey());
     }
 
+    /**
+     * 实际开始读的地方,而readInterestOp实际在NioServerlChannel里面的值是ACCEPT事件
+     *
+     * @throws Exception
+     */
     @Override
     protected void doBeginRead() throws Exception {
         // Channel.read() or ChannelHandlerContext.read() was called
