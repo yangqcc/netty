@@ -18,18 +18,22 @@ package io.netty.channel;
 import io.netty.util.concurrent.EventExecutorGroup;
 
 /**
+ * EventLoopGroup包含EventLoop,所以有Register操作,是将channel注册到EventLoopGroup里面的其中一个
+ * EventLoop里面,EvenLoop是一个特殊的EventLoopGroup
  * Special {@link EventExecutorGroup} which allows registering {@link Channel}s that get
  * processed for later selection during the event loop.
  *
  */
 public interface EventLoopGroup extends EventExecutorGroup {
     /**
+     * 返回下个EventLoop
      * Return the next {@link EventLoop} to use
      */
     @Override
     EventLoop next();
 
     /**
+     * 注册Channel到EventLoop里面,如果注册完成,会通知ChannelFuture
      * Register a {@link Channel} with this {@link EventLoop}. The returned {@link ChannelFuture}
      * will get notified once the registration was complete.
      */

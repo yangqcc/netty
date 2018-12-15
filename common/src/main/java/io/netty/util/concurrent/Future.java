@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 
 /**
+ * 相比于jdk的Future,添加了Listener已经同步等待之类的操作
  * The result of an asynchronous operation.
  */
 @SuppressWarnings("ClassNameSameAsAncestorName")

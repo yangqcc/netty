@@ -15,12 +15,7 @@
  */
 package io.netty.channel.nio;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelConfig;
-import io.netty.channel.ChannelOutboundBuffer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.RecvByteBufAllocator;
-import io.netty.channel.ServerChannel;
+import io.netty.channel.*;
 
 import java.io.IOException;
 import java.net.PortUnreachableException;
@@ -55,8 +50,14 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
         super.doBeginRead();
     }
 
+    /**
+     * NioServerSocketChannel的ACCPECT事件来时,也要执行其中的read()方法
+     */
     private final class NioMessageUnsafe extends AbstractNioUnsafe {
 
+        /**
+         * 里面包含了SocketChannel
+         */
         private final List<Object> readBuf = new ArrayList<Object>();
 
         @Override
@@ -88,8 +89,10 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
                 }
 
                 int size = readBuf.size();
-                for (int i = 0; i < size; i ++) {
+                for (int i = 0; i < size; i++) {
                     readPending = false;
+                    //触发handler,对于SocketServerChannel,bossEventLoopGroup里面会添加一个hander
+                    //
                     pipeline.fireChannelRead(readBuf.get(i));
                 }
                 readBuf.clear();
@@ -127,7 +130,7 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
         final SelectionKey key = selectionKey();
         final int interestOps = key.interestOps();
 
-        for (;;) {
+        for (; ; ) {
             Object msg = in.current();
             if (msg == null) {
                 // Wrote all messages.

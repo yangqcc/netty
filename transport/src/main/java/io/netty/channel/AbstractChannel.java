@@ -71,6 +71,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     private String strVal;
 
     /**
+     * 里面统一创建了channel的id和unsafe对象以及pipeline
      * Creates a new instance.
      *
      * @param parent the parent of this channel. {@code null} if there's no parent.

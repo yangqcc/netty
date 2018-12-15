@@ -603,6 +603,12 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /**
+     * 处理NioChannel的SelectKey
+     *
+     * @param k
+     * @param ch
+     */
     private void processSelectedKey(SelectionKey k, AbstractNioChannel ch) {
         final AbstractNioChannel.NioUnsafe unsafe = ch.unsafe();
         if (!k.isValid()) {
@@ -650,6 +656,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             // Also check for readOps of 0 to workaround possible JDK bug which may otherwise lead
             // to a spin loop
             if ((readyOps & (SelectionKey.OP_READ | SelectionKey.OP_ACCEPT)) != 0 || readyOps == 0) {
+                //unsafe方法,ServerSocketChannel会进行ACCPECT事件,获取SocketChanel,并且通过handler将SocketChannel注册
+                //到childEventLoopGroup里面其中一个NioEvenLoop里面,而SocketChannel事件会在childEventLoopGroup里面中的一个
+                //NioEventLoop里面执行jdk原生api的socket的READ操作
                 unsafe.read();
             }
         } catch (CancelledKeyException ignored) {

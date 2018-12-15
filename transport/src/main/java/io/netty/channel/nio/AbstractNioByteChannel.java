@@ -17,14 +17,7 @@ package io.netty.channel.nio;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelConfig;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelMetadata;
-import io.netty.channel.ChannelOutboundBuffer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.FileRegion;
-import io.netty.channel.RecvByteBufAllocator;
+import io.netty.channel.*;
 import io.netty.channel.internal.ChannelUtils;
 import io.netty.channel.socket.ChannelInputShutdownEvent;
 import io.netty.channel.socket.ChannelInputShutdownReadComplete;
@@ -44,7 +37,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
     private static final ChannelMetadata METADATA = new ChannelMetadata(false, 16);
     private static final String EXPECTED_TYPES =
             " (expected: " + StringUtil.simpleClassName(ByteBuf.class) + ", " +
-            StringUtil.simpleClassName(FileRegion.class) + ')';
+                    StringUtil.simpleClassName(FileRegion.class) + ')';
 
     private final Runnable flushTask = new Runnable() {
         @Override
@@ -57,10 +50,11 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
     private boolean inputClosedSeenErrorOnRead;
 
     /**
+     * ScoketChannel感兴趣时间默认就是READ事件
      * Create a new instance
      *
-     * @param parent            the parent {@link Channel} by which this instance was created. May be {@code null}
-     * @param ch                the underlying {@link SelectableChannel} on which it operates
+     * @param parent the parent {@link Channel} by which this instance was created. May be {@code null}
+     * @param ch     the underlying {@link SelectableChannel} on which it operates
      */
     protected AbstractNioByteChannel(Channel parent, SelectableChannel ch) {
         super(parent, ch, SelectionKey.OP_READ);
@@ -111,7 +105,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
         }
 
         private void handleReadException(ChannelPipeline pipeline, ByteBuf byteBuf, Throwable cause, boolean close,
-                RecvByteBufAllocator.Handle allocHandle) {
+                                         RecvByteBufAllocator.Handle allocHandle) {
             if (byteBuf != null) {
                 if (byteBuf.isReadable()) {
                     readPending = false;
@@ -188,15 +182,16 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
     /**
      * Write objects to the OS.
+     *
      * @param in the collection which contains objects to write.
      * @return The value that should be decremented from the write quantum which starts at
      * {@link ChannelConfig#getWriteSpinCount()}. The typical use cases are as follows:
      * <ul>
-     *     <li>0 - if no write was attempted. This is appropriate if an empty {@link ByteBuf} (or other empty content)
-     *     is encountered</li>
-     *     <li>1 - if a single call to write data was made to the OS</li>
-     *     <li>{@link ChannelUtils#WRITE_STATUS_SNDBUF_FULL} - if an attempt to write data was made to the OS, but no
-     *     data was accepted</li>
+     * <li>0 - if no write was attempted. This is appropriate if an empty {@link ByteBuf} (or other empty content)
+     * is encountered</li>
+     * <li>1 - if a single call to write data was made to the OS</li>
+     * <li>{@link ChannelUtils#WRITE_STATUS_SNDBUF_FULL} - if an attempt to write data was made to the OS, but no
+     * data was accepted</li>
      * </ul>
      * @throws Exception if an I/O exception occurs during write.
      */
@@ -302,7 +297,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
     /**
      * Write a {@link FileRegion}
      *
-     * @param region        the {@link FileRegion} from which the bytes should be written
+     * @param region the {@link FileRegion} from which the bytes should be written
      * @return amount       the amount of written bytes
      */
     protected abstract long doWriteFileRegion(FileRegion region) throws Exception;
@@ -314,7 +309,8 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
 
     /**
      * Write bytes form the given {@link ByteBuf} to the underlying {@link java.nio.channels.Channel}.
-     * @param buf           the {@link ByteBuf} from which the bytes should be written
+     *
+     * @param buf the {@link ByteBuf} from which the bytes should be written
      * @return amount       the amount of written bytes
      */
     protected abstract int doWriteBytes(ByteBuf buf) throws Exception;
