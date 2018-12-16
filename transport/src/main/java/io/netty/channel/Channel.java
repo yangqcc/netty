@@ -194,7 +194,7 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
     Channel flush();
 
     /**
-     * Unsafe用于操作实际通道/传输信息
+     * Unsafe用于操作实际通道/传输信息,除了下面几个方法,其他的都必须被I/O线程调用
      * <em>Unsafe</em> operations that should <em>never</em> be called from user-code. These methods
      * are only provided to implement the actual transport, and must be invoked from an I/O thread except for the
      * following methods:
@@ -228,7 +228,7 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
         SocketAddress remoteAddress();
 
         /**
-         * 注册ChannelPromise中的channel,一旦注册成功,通知ChannelFuture
+         * 注册ChannelPromise中的channel到EventLoop上面,一旦注册成功,通知ChannelFuture
          * Register the {@link Channel} of the {@link ChannelPromise} and notify
          * the {@link ChannelFuture} once the registration was complete.
          */

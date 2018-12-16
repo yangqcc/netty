@@ -38,7 +38,7 @@ import io.netty.util.CharsetUtil;
 /**
  * Server that accept the path of a file an echo back its content.
  */
-public final class FileServer {
+public final class  FileServer {
 
     static final boolean SSL = System.getProperty("ssl") != null;
     // Use the same default port with the telnet example so that we can use the telnet client example to access it.

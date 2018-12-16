@@ -43,7 +43,8 @@ import java.nio.channels.Channels;
  * replace handlers in the pipeline dynamically at runtime.
  *
  * <h3>Retrieving for later use</h3>
- *
+ *  也可以保存一个ChannelHandlerContext以便后面使用,就像在handler方法外面触发一个事件,
+ *  即使他们在不同的线程
  * You can keep the {@link ChannelHandlerContext} for later use, such as
  * triggering an event outside the handler methods, even from a different thread.
  * <pre>
@@ -69,7 +70,7 @@ import java.nio.channels.Channels;
  * context.  Please refer to {@link ChannelHandler} to learn various recommended
  * ways to manage stateful information.
  *
- * <h3>A handler can have more than one context</h3>
+ * <h3>A handler can have more than one context 一个handler可能会有多个context</h3>
  *
  * Please note that a {@link ChannelHandler} instance can be added to more than
  * one {@link ChannelPipeline}.  It means a single {@link ChannelHandler}
