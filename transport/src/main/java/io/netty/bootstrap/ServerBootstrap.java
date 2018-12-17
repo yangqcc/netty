@@ -155,6 +155,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             currentChildAttrs = childAttrs.entrySet().toArray(newAttrArray(0));
         }
 
+        //channel的pipeline再次添加一个hander,遇到读事件后,将ServerSockerChannel的ACCPECT事件获取的SocketChannel注册到childEventLoop
         p.addLast(new ChannelInitializer<Channel>() {
             @Override
             public void initChannel(final Channel ch) throws Exception {
@@ -244,6 +245,8 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             }
 
             try {
+                //将ServerSocketChannel的ACCPECT事件获取的SocketChannel获取的SocketChannel注册到childgroup
+                //而childgroup里面会有很多NioEventLoop,里面的Executor会执行SocketChannel的READ事件
                 childGroup.register(child).addListener(new ChannelFutureListener() {
                     @Override
                     public void operationComplete(ChannelFuture future) throws Exception {

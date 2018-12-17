@@ -58,7 +58,7 @@ import java.lang.annotation.Target;
  * downstream, modify the pipeline dynamically, or store the information
  * (using {@link AttributeKey}s) which is specific to the handler.
  *
- * <h3>State management</h3>
+ * <h3>State management ChannelHandler经常会保存状态信息,最简单也是推荐的做法是使用成员变量</h3>
  *
  * A {@link ChannelHandler} often needs to store some stateful information.
  * The simplest and recommended approach is to use member variables:
@@ -87,6 +87,7 @@ import java.lang.annotation.Target;
  *     ...
  * }
  * </pre>
+ * 每个通道都创建handler
  * Because the handler instance has a state variable which is dedicated to
  * one connection, you have to create a new handler instance for each new
  * channel to avoid a race condition where a unauthenticated client can get
@@ -104,7 +105,7 @@ import java.lang.annotation.Target;
  * </pre>
  *
  * <h4>Using {@link AttributeKey}s</h4>
- *
+ * 如果不想创建很多handler,而是多个通道使用一个handler,那么可以用AttributeKey保存状态信息
  * Although it's recommended to use member variables to store the state of a
  * handler, for some reason you might not want to create many handler instances.
  * In such a case, you can use {@link AttributeKey}s which is provided by

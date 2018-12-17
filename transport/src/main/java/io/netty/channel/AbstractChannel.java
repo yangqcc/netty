@@ -71,6 +71,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
     private String strVal;
 
     /**
+     * 里面统一创建了channel的id和unsafe对象以及pipeline
      * Creates a new instance.
      *
      * @param parent the parent of this channel. {@code null} if there's no parent.
@@ -482,7 +483,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 return;
             }
 
-            //这里eventLoop绑定到channel上面
+            //这里eventLoop绑定到channel上面,这里的eventLoop就是bossgroup下面产生的childgroup
             AbstractChannel.this.eventLoop = eventLoop;
 
             /**
@@ -535,6 +536,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
                 // channel在之前没有注册才会触发channelActive事件,防止一个通道取消注册然后再次注册而多次重复触发channelActive事件
                 // Only fire a channelActive if the channel has never been registered. This prevents firing
                 // multiple channel actives if the channel is deregistered and re-registered.
+                // 如果是第一次注册,由于还没有bind,所以,isActive返回false
                 if (isActive()) {
                     if (firstRegistration) {
                         //触发channelActive事件

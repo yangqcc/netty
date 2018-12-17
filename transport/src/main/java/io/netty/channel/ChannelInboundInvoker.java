@@ -18,6 +18,7 @@ package io.netty.channel;
 public interface ChannelInboundInvoker {
 
     /**
+     * 一个channel注册到EventLoop时被调用,这个方法最终会调用到PipeLine里面的下一个ChannelInboundHandler里面的channelRegistered方法
      * A {@link Channel} was registered to its {@link EventLoop}.
      *
      * This will result in having the  {@link ChannelInboundHandler#channelRegistered(ChannelHandlerContext)} method
