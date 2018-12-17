@@ -115,11 +115,14 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
     boolean isActive();
 
     /**
+     * 返回jdk原生channel的元数据
      * Return the {@link ChannelMetadata} of the {@link Channel} which describe the nature of the {@link Channel}.
      */
     ChannelMetadata metadata();
 
     /**
+     * 返回channel绑定的本地地址,返回的SocketAddress经常向下转型为更加准确的类型,例如{@link InetSocketAddress}
+     * ,这样会有更加详细的信息
      * Returns the local address where this channel is bound to.  The returned
      * {@link SocketAddress} is supposed to be down-cast into more concrete
      * type such as {@link InetSocketAddress} to retrieve the detailed
@@ -131,6 +134,7 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
     SocketAddress localAddress();
 
     /**
+     * 返回连接的远程地址
      * Returns the remote address where this channel is connected to.  The
      * returned {@link SocketAddress} is supposed to be down-cast into more
      * concrete type such as {@link InetSocketAddress} to retrieve the detailed

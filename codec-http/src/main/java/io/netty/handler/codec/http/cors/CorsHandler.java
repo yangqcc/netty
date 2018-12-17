@@ -15,18 +15,8 @@
  */
 package io.netty.handler.codec.http.cors;
 
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
-import io.netty.handler.codec.http.DefaultFullHttpResponse;
-import io.netty.handler.codec.http.HttpHeaderNames;
-import io.netty.handler.codec.http.HttpHeaderValues;
-import io.netty.handler.codec.http.HttpHeaders;
-import io.netty.handler.codec.http.HttpRequest;
-import io.netty.handler.codec.http.HttpResponse;
-import io.netty.handler.codec.http.HttpUtil;
+import io.netty.channel.*;
+import io.netty.handler.codec.http.*;
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;
 
@@ -83,20 +73,25 @@ public class CorsHandler extends ChannelDuplexHandler {
             request = (HttpRequest) msg;
             final String origin = request.headers().get(HttpHeaderNames.ORIGIN);
             config = getForOrigin(origin);
+            //判断是否是预检请求(preflight)
+            //请求首部  Access-Control-Request-Headers 出现于 preflight request （预检请求）中，用于通知服务器在真正的请求中会采用哪些请求首部。
             if (isPreflightRequest(request)) {
                 handlePreflight(ctx, request);
                 return;
             }
+            //origin为空,或者origin字段没有在handler允许列表里面,拒绝当前连接
             if (isShortCircuit && !(origin == null || config != null)) {
                 forbidden(ctx, request);
                 return;
             }
         }
+        //过滤成功,触发后面的handler
         ctx.fireChannelRead(msg);
     }
 
     private void handlePreflight(final ChannelHandlerContext ctx, final HttpRequest request) {
         final HttpResponse response = new DefaultFullHttpResponse(request.protocolVersion(), OK, true, true);
+        //setOrigin设置response,会判断origin请求域是否在当前允许域里面
         if (setOrigin(response)) {
             setAllowMethods(response);
             setAllowHeaders(response);
