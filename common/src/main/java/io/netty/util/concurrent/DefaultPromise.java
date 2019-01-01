@@ -221,6 +221,7 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
 
         synchronized (this) {
             while (!isDone()) {
+                //计算waiter的数量,如果超过指定数量,会抛出异常
                 incWaiters();
                 try {
                     wait();
@@ -541,6 +542,12 @@ public class DefaultPromise<V> extends AbstractFuture<V> implements Promise<V> {
         return setValue0(new CauseHolder(checkNotNull(cause, "cause")));
     }
 
+    /**
+     * 设置将result字段的值,当result字段值为null或者UNCANCELLANLE时,才能够被设置
+     *
+     * @param objResult
+     * @return
+     */
     private boolean setValue0(Object objResult) {
         if (RESULT_UPDATER.compareAndSet(this, null, objResult) ||
                 RESULT_UPDATER.compareAndSet(this, UNCANCELLABLE, objResult)) {

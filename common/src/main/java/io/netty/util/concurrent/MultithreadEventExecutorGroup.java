@@ -59,7 +59,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
     }
 
     /**
-     * 构造方法里面会初始化几个子EventLoop
+     * 构造方法里面会初始化几个子group
      * Create a new instance.
      *
      * @param nThreads       the number of threads that will be used by this instance.
@@ -85,7 +85,7 @@ public abstract class MultithreadEventExecutorGroup extends AbstractEventExecuto
         for (int i = 0; i < nThreads; i++) {
             boolean success = false;
             try {
-                //创建子reactor
+                //当前EventLoopGroup的EventLoop
                 children[i] = newChild(executor, args);
                 success = true;
             } catch (Exception e) {

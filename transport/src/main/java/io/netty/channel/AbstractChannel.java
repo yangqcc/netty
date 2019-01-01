@@ -862,6 +862,9 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             });
         }
 
+        /**
+         * 开始读
+         */
         @Override
         public final void beginRead() {
             assertEventLoop();

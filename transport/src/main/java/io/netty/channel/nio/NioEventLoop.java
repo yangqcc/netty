@@ -395,6 +395,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         for (; ; ) {
             try {
                 try {
+                    //有task就执行task,没有就执行SelectStrategy.SELECT策略
                     switch (selectStrategy.calculateStrategy(selectNowSupplier, hasTasks())) {
                         case SelectStrategy.CONTINUE:
                             continue;
@@ -780,7 +781,6 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     break;
                 }
 
-                // 3.阻塞式select操作
                 int selectedKeys = selector.select(timeoutMillis);
                 selectCnt++;
 

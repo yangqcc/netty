@@ -1324,7 +1324,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
     }
 
     /**
-     * HeadContext执行连接操作
+     * HeadContext执行连接操作,HeadContext里面开始启动了读事件
      */
     final class HeadContext extends AbstractChannelHandlerContext
             implements ChannelOutboundHandler, ChannelInboundHandler {
@@ -1453,6 +1453,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         private void readIfIsAutoRead() {
             //isAutoRead默认返回true
             if (channel.config().isAutoRead()) {
+                //设置通道可读
                 channel.read();
             }
         }
