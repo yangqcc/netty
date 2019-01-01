@@ -155,7 +155,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
             currentChildAttrs = childAttrs.entrySet().toArray(newAttrArray(0));
         }
 
-        //channel的pipeline再次添加一个hander,遇到读事件后,将ServerSockerChannel的ACCPECT事件获取的SocketChannel注册到childEventLoop
+        //channel的pipeline再次添加一个handler,遇到读事件后,将ServerSocketChannel的ACCPECT事件获取的SocketChannel注册到childEventLoop
         p.addLast(new ChannelInitializer<Channel>() {
             @Override
             public void initChannel(final Channel ch) throws Exception {
@@ -164,7 +164,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                 if (handler != null) {
                     pipeline.addLast(handler);
                 }
-                //加入一个接入器
+                //加入一个接入器,用于将ServerSocketChannel获取的SocketChannel注册到childGroup里面
                 ch.eventLoop().execute(new Runnable() {
                     @Override
                     public void run() {

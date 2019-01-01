@@ -136,7 +136,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      * @param parent          the {@link EventExecutorGroup} which is the parent of this instance and belongs to it
      * @param executor        the {@link Executor} which will be used for executing
      * @param addTaskWakesUp  {@code true} if and only if invocation of {@link #addTask(Runnable)} will wake up the
-     *                        executor thread
+     *                        executor thread 如果设置为true,那么只会在调用addTask方法是唤醒executor线程
      * @param maxPendingTasks the maximum number of pending tasks before new tasks will be rejected.
      * @param rejectedHandler the {@link RejectedExecutionHandler} to use.
      */
@@ -754,6 +754,11 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         return isTerminated();
     }
 
+    /**
+     * 比如执行channel的dobind方法
+     *
+     * @param task 任务
+     */
     @Override
     public void execute(Runnable task) {
         if (task == null) {
@@ -761,8 +766,10 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
         }
 
         boolean inEventLoop = inEventLoop();
+        //将任务添加到队列
         addTask(task);
         if (!inEventLoop) {
+            //启动线程
             startThread();
             if (isShutdown()) {
                 boolean reject = false;
@@ -871,6 +878,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      */
     private void startThread() {
         if (state == ST_NOT_STARTED) {
+            //先设置状态,再启动线程
             if (STATE_UPDATER.compareAndSet(this, ST_NOT_STARTED, ST_STARTED)) {
                 try {
                     doStartThread();
@@ -887,9 +895,12 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
      */
     private void doStartThread() {
         assert thread == null;
+        //这里是将当前进类的run方法封装成Runnable放到executor里面执行
+        //每个EventLoop里面都有一个Executor
         executor.execute(new Runnable() {
             @Override
             public void run() {
+                //赋值,将thread进行赋值
                 thread = Thread.currentThread();
                 if (interrupted) {
                     thread.interrupt();
@@ -898,7 +909,8 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
                 boolean success = false;
                 updateLastExecutionTime();
                 try {
-                    //将run方法塞到线程池中执行
+                    //将run方法塞到线程池中执行,因为Executor就是EventLoop
+                    //该run方法可以参考NioEventLoop里面的run方法
                     SingleThreadEventExecutor.this.run();
                     success = true;
                 } catch (Throwable t) {

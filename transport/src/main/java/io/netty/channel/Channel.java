@@ -229,6 +229,7 @@ public interface Channel extends AttributeMap, ChannelOutboundInvoker, Comparabl
 
         /**
          * 注册ChannelPromise中的channel到EventLoop上面,一旦注册成功,通知ChannelFuture
+         * 同时channel里面会保存一个EventLoop
          * Register the {@link Channel} of the {@link ChannelPromise} and notify
          * the {@link ChannelFuture} once the registration was complete.
          */

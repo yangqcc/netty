@@ -487,7 +487,7 @@ public abstract class AbstractChannel extends DefaultAttributeMap implements Cha
             AbstractChannel.this.eventLoop = eventLoop;
 
             /**
-             * 判断当前线程是否是eventLoop的线程,如果是,那么直接注册,如果不是,放入eventLoop中的线程池进行注册,
+             * 判断当前线程是否是eventLoop的线程,如果是,那么直接注册,如果不是,那么用eventLoop进行注册操作,
              * 放入线程池中,也可能是马上执行,也可能是放入阻塞队列
              */
             if (eventLoop.inEventLoop()) {

@@ -403,6 +403,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                             // fall-through to SELECT since the busy-wait is not supported with NIO
 
                         case SelectStrategy.SELECT:
+                            //轮询注册到reactor线程中selector上的所有就绪的io事件
                             select(wakenUp.getAndSet(false));
 
                             // 'wakenUp.compareAndSet(false, true)' is always evaluated
@@ -452,6 +453,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 final int ioRatio = this.ioRatio;
                 if (ioRatio == 100) {
                     try {
+                        //处理io事件
                         processSelectedKeys();
                     } finally {
                         // Ensure we always run tasks.
@@ -461,6 +463,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 } else {
                     final long ioStartTime = System.nanoTime();
                     try {
+                        //处理产生的io事件
                         processSelectedKeys();
                     } finally {
                         // Ensure we always run tasks.
@@ -719,6 +722,11 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /**
+     * 重写了父类的wakeUp方法,在提交任务时,会唤醒阻塞的selector
+     *
+     * @param inEventLoop
+     */
     @Override
     protected void wakeup(boolean inEventLoop) {
         if (!inEventLoop && wakenUp.compareAndSet(false, true)) {
@@ -751,6 +759,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
             for (; ; ) {
                 long timeoutMillis = (selectDeadLineNanos - currentTimeNanos + 500000L) / 1000000L;
                 if (timeoutMillis <= 0) {
+                    //跳出循环之前,如果发现还没有执行过select操作,那么执行selectNow操作
                     if (selectCnt == 0) {
                         selector.selectNow();
                         selectCnt = 1;
@@ -758,6 +767,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     break;
                 }
 
+                // 轮询中,如果发现有任务提交,那么执行一次selectNow操作,并且退出
+                // netty为了保证任务队列能够及时执行，在进行阻塞select操作的时候会判断任务队列是否为空，
+                // 如果不为空，就执行一次非阻塞select操作，跳出循环
                 // If a task was submitted when wakenUp value was true, the task didn't get a chance to call
                 // Selector#wakeup. So we need to check task queue again before executing select operation.
                 // If we don't, the task might be pended until select operation was timed out.
@@ -768,8 +780,17 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                     break;
                 }
 
+                // 3.阻塞式select操作
                 int selectedKeys = selector.select(timeoutMillis);
                 selectCnt++;
+
+                //阻塞select操作结束之后，netty又做了一系列的状态判断来决定是否中断本次轮询，中断本次轮询的条件有
+
+                //  轮询到IO事件 （selectedKeys != 0）
+                //  oldWakenUp 参数为true
+                //  任务队列里面有任务（hasTasks）
+                //  第一个定时任务即将要被执行 （hasScheduledTasks（））
+                //  用户主动唤醒（wakenUp.get()）
 
                 if (selectedKeys != 0 || oldWakenUp || wakenUp.get() || hasTasks() || hasScheduledTasks()) {
                     // - Selected something,
@@ -831,6 +852,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 "Selector.select() returned prematurely {} times in a row; rebuilding Selector {}.",
                 selectCnt, selector);
 
+        //为解决jdk select空转bug,会重建selector
         rebuildSelector();
         Selector selector = this.selector;
 

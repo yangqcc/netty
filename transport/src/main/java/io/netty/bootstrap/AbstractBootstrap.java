@@ -318,7 +318,9 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
     final ChannelFuture initAndRegister() {
         Channel channel = null;
         try {
+            //生成新的channel
             channel = channelFactory.newChannel();
+            //初始化channel,添加必要的handler
             init(channel);
         } catch (Throwable t) {
             if (channel != null) {
@@ -333,6 +335,7 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
 
         /**
          * config的EventLoopGroup注册channel,这里的group就是父EventLoopGroup
+         * 对于ServerSocket来说,先注册到父EventLoopGroup上面
          */
         ChannelFuture regFuture = config().group().register(channel);
         if (regFuture.cause() != null) {
@@ -368,6 +371,8 @@ public abstract class AbstractBootstrap<B extends AbstractBootstrap<B, C>, C ext
             final SocketAddress localAddress, final ChannelPromise promise) {
 
         // 在通道注册前调用,给用户的handler通过channelRegistered()操作进行设置pipeline的机会
+        // 通过channel所关联的eventLoop进行执行,eventLoop在register的时候将EventLoopGroup里面的一个
+        // EventLoop分配给了channel
         // This method is invoked before channelRegistered() is triggered.  Give user handlers a chance to set up
         // the pipeline in its channelRegistered() implementation.
         channel.eventLoop().execute(new Runnable() {

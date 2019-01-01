@@ -41,6 +41,7 @@ public interface EventExecutor extends EventExecutorGroup {
     boolean inEventLoop();
 
     /**
+     * 如果提交任务的线程就在eventLoop里面返回true
      * Return {@code true} if the given {@link Thread} is executed in the event loop,
      * {@code false} otherwise.
      */

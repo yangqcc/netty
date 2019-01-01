@@ -119,7 +119,7 @@ public class NioEventLoopGroup extends MultithreadEventLoopGroup {
 
     @Override
     protected EventLoop newChild(Executor executor, Object... args) throws Exception {
-        //新建子EventLoop,当前类作为NioEventLoop的父类,SelectorProvider放入NioEventLoop,NioEventLoop
+        //新建子EventLoop,当前类EventLoopGroup作为NioEventLoop的父类,SelectorProvider放入NioEventLoop,NioEventLoop
         //的构造函数里面会产生一个Selector,然后将Channel注册到这个EventLoop的Selector上面
         return new NioEventLoop(this, executor, (SelectorProvider) args[0],
                 ((SelectStrategyFactory) args[1]).newSelectStrategy(), (RejectedExecutionHandler) args[2]);
