@@ -165,6 +165,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
                     pipeline.addLast(handler);
                 }
                 //加入一个接入器,用于将ServerSocketChannel获取的SocketChannel注册到childGroup里面
+                //而ServerSocketChannel是注册到父Group里面的
                 ch.eventLoop().execute(new Runnable() {
                     @Override
                     public void run() {
@@ -236,6 +237,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
             final Channel child = (Channel) msg;
 
+            //用于将ServerSocketChannel获取的SocketChannel注册到子Group里面
             child.pipeline().addLast(childHandler);
 
             setChannelOptions(child, childOptions, logger);
