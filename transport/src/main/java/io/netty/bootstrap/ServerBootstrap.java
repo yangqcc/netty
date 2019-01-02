@@ -235,6 +235,7 @@ public class ServerBootstrap extends AbstractBootstrap<ServerBootstrap, ServerCh
         @Override
         @SuppressWarnings("unchecked")
         public void channelRead(ChannelHandlerContext ctx, Object msg) {
+            //这里为ServerSocketChannel ACCEPT后的SocketChannel
             final Channel child = (Channel) msg;
 
             //用于将ServerSocketChannel获取的SocketChannel注册到子Group里面

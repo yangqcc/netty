@@ -405,7 +405,8 @@ public abstract class AbstractNioChannel extends AbstractChannel {
     }
 
     /**
-     * 实际开始读的地方,而readInterestOp实际在NioServerlChannel里面的值是ACCEPT事件
+     * 实际开始读的地方,而readInterestOp实际在NioServerChannel里面的值是ACCEPT事件
+     * 对于NioSocketChannel则是READ事件
      *
      * @throws Exception
      */

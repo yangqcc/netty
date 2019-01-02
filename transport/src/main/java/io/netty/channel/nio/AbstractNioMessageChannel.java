@@ -73,6 +73,8 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
             try {
                 try {
                     do {
+                        //doReadMessages执行了ServerSocketChannel的ACCEPT操作,将获取到的SocketChannel放入
+                        //到readBuf里面,该方法成功返回1,失败返回0
                         int localRead = doReadMessages(readBuf);
                         if (localRead == 0) {
                             break;
@@ -92,7 +94,9 @@ public abstract class AbstractNioMessageChannel extends AbstractNioChannel {
                 for (int i = 0; i < size; i++) {
                     readPending = false;
                     //触发handler,对于SocketServerChannel,bossEventLoopGroup里面会添加一个hander
-                    //
+                    //readBuf.get(i)其实就是SocketChannel
+                    // 记住ServerSocketChannel的pipeline里面添加了ServerBootstrap里面的ServerBootstrapAcceptor
+                    // 类的实体,里面的channelRead方法会将SocketChannel注册到子EventLoopGroup里面
                     pipeline.fireChannelRead(readBuf.get(i));
                 }
                 readBuf.clear();

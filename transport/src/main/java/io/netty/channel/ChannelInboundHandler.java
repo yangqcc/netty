@@ -31,7 +31,7 @@ public interface ChannelInboundHandler extends ChannelHandler {
      */
     void channelUnregistered(ChannelHandlerContext ctx) throws Exception;
 
-    /**
+    /**-
      * The {@link Channel} of the {@link ChannelHandlerContext} is now active
      */
     void channelActive(ChannelHandlerContext ctx) throws Exception;

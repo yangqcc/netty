@@ -1430,6 +1430,7 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             //继续执行下面的handler
             ctx.fireChannelActive();
             //执行完handler执行下面函数
+            //判断是否自动读,如果是,那么开始读
             readIfIsAutoRead();
         }
 

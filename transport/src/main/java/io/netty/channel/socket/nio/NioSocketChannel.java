@@ -86,7 +86,8 @@ public class NioSocketChannel extends AbstractNioByteChannel implements io.netty
     }
 
     /**
-     * Create a new instance
+     * Create a new instance,如果parent为null,表示该SocketChannel由用户创建,否则表示由ServerSocketChannel创建
+     * 创建Channel时,也会同时创建Pipeline,并将jdk的channel放入到里面
      *
      * @param parent the {@link Channel} which created this instance or {@code null} if it was created by the user
      * @param socket the {@link SocketChannel} which will be used

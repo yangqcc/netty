@@ -46,7 +46,8 @@ public final class NioEventLoop extends SingleThreadEventLoop {
 
     private static final InternalLogger logger = InternalLoggerFactory.getInstance(NioEventLoop.class);
 
-    private static final int CLEANUP_INTERVAL = 256; // XXX Hard-coded value, but won't need customization.
+    // XXX Hard-coded value, but won't need customization.
+    private static final int CLEANUP_INTERVAL = 256;
 
     private static final boolean DISABLE_KEYSET_OPTIMIZATION =
             SystemPropertyUtil.getBoolean("io.netty.noKeySetOptimization", false);
@@ -150,9 +151,15 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
     }
 
+    /**
+     * 在新建NioEventLoop的时候,打开Selector
+     *
+     * @return
+     */
     private SelectorTuple openSelector() {
         final Selector unwrappedSelector;
         try {
+            //没有封装的Selector
             unwrappedSelector = provider.openSelector();
         } catch (IOException e) {
             throw new ChannelException("failed to open a new selector", e);
@@ -325,6 +332,9 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         rebuildSelector0();
     }
 
+    /**
+     * 重建Selector
+     */
     private void rebuildSelector0() {
         final Selector oldSelector = selector;
         final SelectorTuple newSelectorTuple;
@@ -334,6 +344,7 @@ public final class NioEventLoop extends SingleThreadEventLoop {
         }
 
         try {
+            //重新打开一个新的Selector
             newSelectorTuple = openSelector();
         } catch (Exception e) {
             logger.warn("Failed to create a new Selector.", e);
@@ -582,20 +593,23 @@ public final class NioEventLoop extends SingleThreadEventLoop {
     private void processSelectedKeysOptimized() {
         for (int i = 0; i < selectedKeys.size; ++i) {
             final SelectionKey k = selectedKeys.keys[i];
+            //设置为null是为了帮助GC
             // null out entry in the array to allow to have it GC'ed once the Channel close
             // See https://github.com/netty/netty/issues/2363
             selectedKeys.keys[i] = null;
 
             final Object a = k.attachment();
-
+            //处理channel,可以关注doRegister方法,注册的时候,会将channel附属上去
             if (a instanceof AbstractNioChannel) {
                 processSelectedKey(k, (AbstractNioChannel) a);
             } else {
+                //NioTask主要是用于当一个 SelectableChannel 注册到selector的时候,执行一些任务
                 @SuppressWarnings("unchecked")
                 NioTask<SelectableChannel> task = (NioTask<SelectableChannel>) a;
                 processSelectedKey(k, task);
             }
 
+            //判断是否再次轮询
             if (needsToSelectAgain) {
                 // null out entries in the array to allow to have it GC'ed once the Channel close
                 // See https://github.com/netty/netty/issues/2363
@@ -651,12 +665,14 @@ public final class NioEventLoop extends SingleThreadEventLoop {
                 unsafe.finishConnect();
             }
 
+            //判断是读事件
             // Process OP_WRITE first as we may be able to write some queued buffers and so free memory.
             if ((readyOps & SelectionKey.OP_WRITE) != 0) {
                 // Call forceFlush which will also take care of clear the OP_WRITE once there is nothing left to write
                 ch.unsafe().forceFlush();
             }
 
+            // 判断死读事件还是接收事件,顺便也要判断下readyOps是否是0,避免jdk轮询引起的空转bug
             // Also check for readOps of 0 to workaround possible JDK bug which may otherwise lead
             // to a spin loop
             if ((readyOps & (SelectionKey.OP_READ | SelectionKey.OP_ACCEPT)) != 0 || readyOps == 0) {
