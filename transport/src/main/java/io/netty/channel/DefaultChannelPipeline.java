@@ -146,6 +146,15 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         return addFirst(null, name, handler);
     }
 
+    /**
+     * addFirst是添加到header的后面
+     *
+     * @param group   the {@link EventExecutorGroup} which will be used to execute the {@link ChannelHandler}
+     *                methods
+     * @param name    the name of the handler to insert first
+     * @param handler the handler to insert first
+     * @return
+     */
     @Override
     public final ChannelPipeline addFirst(EventExecutorGroup group, String name, ChannelHandler handler) {
         final AbstractChannelHandlerContext newCtx;
@@ -153,8 +162,10 @@ public class DefaultChannelPipeline implements ChannelPipeline {
             checkMultiplicity(handler);
             name = filterName(name, handler);
 
+            //创建一个ChannelContext
             newCtx = newContext(group, name, handler);
 
+            //封装成Context添加到pipeline
             addFirst0(newCtx);
 
             // If the registered is false it means that the channel was not registered on an eventloop yet.
@@ -611,6 +622,11 @@ public class DefaultChannelPipeline implements ChannelPipeline {
         oldCtx.next = newCtx;
     }
 
+    /**
+     * 判断是否没有注解{@link ChannelHandler.Sharable}的handler重复添加
+     *
+     * @param handler
+     */
     private static void checkMultiplicity(ChannelHandler handler) {
         if (handler instanceof ChannelHandlerAdapter) {
             ChannelHandlerAdapter h = (ChannelHandlerAdapter) handler;

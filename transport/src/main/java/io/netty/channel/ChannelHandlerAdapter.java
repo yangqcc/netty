@@ -25,7 +25,10 @@ import java.util.Map;
  */
 public abstract class ChannelHandlerAdapter implements ChannelHandler {
 
-    // Not using volatile because it's used only for a sanity check.
+    /**
+     * Not using volatile because it's used only for a sanity check.
+     * sanity check 合理性检查,判断没有添加Sharable的handler是否重复添加
+     */
     boolean added;
 
     /**
@@ -79,7 +82,7 @@ public abstract class ChannelHandlerAdapter implements ChannelHandler {
     /**
      * Calls {@link ChannelHandlerContext#fireExceptionCaught(Throwable)} to forward
      * to the next {@link ChannelHandler} in the {@link ChannelPipeline}.
-     *
+     * <p>
      * Sub-classes may override this method to change behavior.
      */
     @Override

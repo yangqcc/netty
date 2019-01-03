@@ -41,7 +41,8 @@ public final class LocalEcho {
         final LocalAddress addr = new LocalAddress(PORT);
 
         EventLoopGroup serverGroup = new DefaultEventLoopGroup();
-        EventLoopGroup clientGroup = new NioEventLoopGroup(); // NIO event loops are also OK
+        // NIO event loops are also OK
+        EventLoopGroup clientGroup = new NioEventLoopGroup();
         try {
             // Note that we can use any event loop to ensure certain local channels
             // are handled by the same event loop thread which drives a certain socket channel

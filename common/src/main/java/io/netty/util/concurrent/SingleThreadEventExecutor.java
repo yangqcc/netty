@@ -340,7 +340,7 @@ public abstract class SingleThreadEventExecutor extends AbstractScheduledEventEx
             if (runAllTasksFrom(taskQueue)) {
                 ranAtLeastOne = true;
             }
-        // keep on processing until we fetched all scheduled tasks.
+            // keep on processing until we fetched all scheduled tasks.
         } while (!fetchedAll);
 
         if (ranAtLeastOne) {
