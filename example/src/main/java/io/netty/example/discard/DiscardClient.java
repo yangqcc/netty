@@ -29,6 +29,8 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
 /**
  * Keeps sending random data to the specified address.
+ *
+ * @author yangqc
  */
 public final class DiscardClient {
 
@@ -42,7 +44,7 @@ public final class DiscardClient {
         final SslContext sslCtx;
         if (SSL) {
             sslCtx = SslContextBuilder.forClient()
-                .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+                    .trustManager(InsecureTrustManagerFactory.INSTANCE).build();
         } else {
             sslCtx = null;
         }
@@ -51,17 +53,17 @@ public final class DiscardClient {
         try {
             Bootstrap b = new Bootstrap();
             b.group(group)
-             .channel(NioSocketChannel.class)
-             .handler(new ChannelInitializer<SocketChannel>() {
-                 @Override
-                 protected void initChannel(SocketChannel ch) throws Exception {
-                     ChannelPipeline p = ch.pipeline();
-                     if (sslCtx != null) {
-                         p.addLast(sslCtx.newHandler(ch.alloc(), HOST, PORT));
-                     }
-                     p.addLast(new DiscardClientHandler());
-                 }
-             });
+                    .channel(NioSocketChannel.class)
+                    .handler(new ChannelInitializer<SocketChannel>() {
+                        @Override
+                        protected void initChannel(SocketChannel ch) throws Exception {
+                            ChannelPipeline p = ch.pipeline();
+                            if (sslCtx != null) {
+                                p.addLast(sslCtx.newHandler(ch.alloc(), HOST, PORT));
+                            }
+                            p.addLast(new DiscardClientHandler());
+                        }
+                    });
 
             // Make the connection attempt.
             ChannelFuture f = b.connect(HOST, PORT).sync();
