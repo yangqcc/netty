@@ -50,7 +50,7 @@ public abstract class AbstractNioByteChannel extends AbstractNioChannel {
     private boolean inputClosedSeenErrorOnRead;
 
     /**
-     * ScoketChannel感兴趣时间默认就是READ事件
+     * ScoketChannel感兴趣事件默认就是READ事件
      * Create a new instance
      *
      * @param parent the parent {@link Channel} by which this instance was created. May be {@code null}
